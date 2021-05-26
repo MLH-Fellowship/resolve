@@ -1,11 +1,15 @@
-# resolve
+# resolve <sup>[![Version Badge][2]][1]</sup>
 
-implements the [node `require.resolve()`
-algorithm](https://nodejs.org/api/modules.html#modules_all_together)
-such that you can `require.resolve()` on behalf of a file asynchronously and
-synchronously
+implements the [node `require.resolve()` algorithm](https://nodejs.org/api/modules.html#modules_all_together) such that you can `require.resolve()` on behalf of a file asynchronously and synchronously
 
-[![build status](https://secure.travis-ci.org/browserify/resolve.png)](http://travis-ci.org/browserify/resolve)
+[![github actions][actions-image]][actions-url]
+[![coverage][codecov-image]][codecov-url]
+[![dependency status][5]][6]
+[![dev dependency status][7]][8]
+[![License][license-image]][license-url]
+[![Downloads][downloads-image]][downloads-url]
+
+[![npm badge][11]][1]
 
 # example
 
@@ -71,7 +75,10 @@ options are:
 
 * opts.realpath - function to asynchronously resolve a potential symlink to its real path
 
-* opts.realpath - function to asynchronously resolve a potential symlink to its real path
+* `opts.readPackage(readFile, pkgfile, cb)` - function to asynchronously read and parse a package.json file
+  * readFile - the passed `opts.readFile` or `fs.readFile` if not specified
+  * pkgfile - path to package.json
+  * cb - callback
 
 * `opts.packageFilter(pkg, pkgfile, dir)` - transform the parsed package.json contents before looking at the "main" field
   * pkg - package data
@@ -137,6 +144,19 @@ default `opts` values:
             else cb(null, realPathErr ? file : realPath);
         });
     },
+    readPackage: function defaultReadPackage(readFile, pkgfile, cb) {
+        readFile(pkgfile, function (readFileErr, body) {
+            if (readFileErr) cb(readFileErr);
+            else {
+                try {
+                    var pkg = JSON.parse(body);
+                    cb(null, pkg);
+                } catch (jsonErr) {
+                    cb(null);
+                }
+            }
+        });
+    },
     moduleDirectory: 'node_modules',
     preserveSymlinks: false
 }
@@ -155,13 +175,17 @@ options are:
 
 * opts.includeCoreModules - set to `false` to exclude node core modules (e.g. `fs`) from the search
 
-* opts.readFile - how to read files synchronously
+* opts.readFileSync - how to read files synchronously
 
 * opts.isFile - function to synchronously test whether a file exists
 
 * opts.isDirectory - function to synchronously test whether a file exists and is a directory
 
 * opts.realpathSync - function to synchronously resolve a potential symlink to its real path
+
+* `opts.readPackageSync(readFileSync, pkgfile)` - function to synchronously read and parse a package.json file
+  * readFileSync - the passed `opts.readFileSync` or `fs.readFileSync` if not specified
+  * pkgfile - path to package.json
 
 * `opts.packageFilter(pkg, pkgfile, dir)` - transform the parsed package.json contents before looking at the "main" field
   * pkg - package data
@@ -231,6 +255,13 @@ default `opts` values:
         }
         return file;
     },
+    readPackageSync: function defaultReadPackageSync(readFileSync, pkgfile) {
+        var body = readFileSync(pkgfile);
+        try {
+            var pkg = JSON.parse(body);
+            return pkg;
+        } catch (jsonErr) {}
+    },
     moduleDirectory: 'node_modules',
     preserveSymlinks: false
 }
@@ -247,3 +278,19 @@ npm install resolve
 # license
 
 MIT
+
+[1]: https://npmjs.org/package/resolve
+[2]: https://versionbadg.es/browserify/resolve.svg
+[5]: https://david-dm.org/browserify/resolve.svg
+[6]: https://david-dm.org/browserify/resolve
+[7]: https://david-dm.org/browserify/resolve/dev-status.svg
+[8]: https://david-dm.org/browserify/resolve#info=devDependencies
+[11]: https://nodei.co/npm/resolve.png?downloads=true&stars=true
+[license-image]: https://img.shields.io/npm/l/resolve.svg
+[license-url]: LICENSE
+[downloads-image]: https://img.shields.io/npm/dm/resolve.svg
+[downloads-url]: https://npm-stat.com/charts.html?package=resolve
+[codecov-image]: https://codecov.io/gh/browserify/resolve/branch/main/graphs/badge.svg
+[codecov-url]: https://app.codecov.io/gh/browserify/resolve/
+[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/browserify/resolve
+[actions-url]: https://github.com/browserify/resolve/actions
